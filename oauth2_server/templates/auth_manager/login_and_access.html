@@ -1,0 +1,8 @@
+<title>Allow access to {{ app_name }} ?</title>
+<form role="form" method="POST">
+		<label for="allow_question">Allow accesss to your data to {{ app_name }}?</label>
+		<p></p>
+		<input type="hidden" name="has_access" value="1" id="has_access">
+		<button type="submit" class="btn btn-default" onclick="$('#has_access').val('1');">Yes</button>
+		<button type="submit" class="btn btn-default" onclick="$('#has_access').val('0');">No</button>
+</form>
