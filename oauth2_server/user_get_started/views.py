@@ -44,6 +44,10 @@ def login_user(request):
 
 		login(request, user)
 
+		if 'redirect_internal' in request.session:
+				#request.method = 'GET'
+				return redirect(request.session['redirect_internal'])
+
 		#TODO:redirect to loggined user home page
 		return HttpResponse("You have been succesfully loginned!")
 
