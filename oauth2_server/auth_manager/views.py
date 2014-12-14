@@ -26,8 +26,12 @@ def auth_code_req(request):
 				#check client_id in data base
 
 				#check redirect uri
-
-				return render(request, 'auth_manager/login_and_access.html', {'app_name' : 'test_app'})
+				#TODO: rename app_name with real application name
+				if request.user.is_authenticated():
+						return render(request, 'auth_manager/access.html', {'app_name' : 'test_app'})
+				else:
+						return HttpResponse("ask for logging in")
+						#return render(request, 'auth_manager/login_and_access.html', {'app_name' : 'test_app'})
 
 		for param  in request.POST.items():
 				print("post : {0}").format(param)
