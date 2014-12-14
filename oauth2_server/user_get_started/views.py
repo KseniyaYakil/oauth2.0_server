@@ -28,6 +28,7 @@ def home(request):
 		return render(request, 'user_get_started/home.html', {'user' : request.user})
 
 def logout_user(request):
+		print("INF: user {0} logged out").format(request.user['username'])
 		logout(request)
-		return redirect('user/')
+		return redirect('/')
 
