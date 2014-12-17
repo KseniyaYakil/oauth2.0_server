@@ -4,4 +4,4 @@ redirect_uri=http://yandex.ru
 name=oauth2.0_client_v1
 
 #request autharization code
-https://oauth2_server.com/auth/?response_type=code&redirect_uri=http://yandex.ru&client_id=AsdQweZxc123456789
+https://oauth2_server.com/auth/?response_type=code&redirect_uri=http://yandex.ru&client_id=AsdQweZxc123456789&state=12345678909

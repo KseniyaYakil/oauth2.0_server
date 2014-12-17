@@ -45,7 +45,8 @@ def login_user(request):
 		login(request, user)
 
 		if 'redirect_internal' in request.session:
-				#request.method = 'GET'
+				for key, value in request.session['get_params'].items():
+						print "login: {0} -> {1}".format(key, value)
 				return redirect(request.session['redirect_internal'])
 
 		#TODO:redirect to loggined user home page
