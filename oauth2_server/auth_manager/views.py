@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from config import AuthConf
 from django.http.response import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
-from .models import client_info, access_token
+from datetime import datetime
+from .models import client_info, access_token, auth_code
 from urlparse import urlparse
+from uuid import uuid4
 
-def check_client_id(client_app_id):
+def get_client_id(client_app_id):
 		try:
 				client_app = get_object_or_404(client_info, client_id=client_app_id)
 				return client_app
@@ -33,7 +34,7 @@ def parse_req_params(request):
 		return auth_need_params
 
 def check_req_params(auth_need_params):
-		client_app = check_client_id(auth_need_params['client_id'])
+		client_app = get_client_id(auth_need_params['client_id'])
 		if client_app is None:
 				return 'no_client'
 
@@ -46,6 +47,9 @@ def check_req_params(auth_need_params):
 				return 'incorrect_redirect_domain'
 
 		return None
+
+def generate_code():
+    return uuid4().hex
 
 @csrf_exempt
 def auth_code_req(request):
@@ -73,14 +77,6 @@ def auth_code_req(request):
 						request.session['redirect_internal'] = '/auth'
 						return redirect('/user/login_user/')
 
-		if request.method == 'POST':
-			for param  in request.POST.items():
-				print("post : {0}").format(param)
-
-		for param  in auth_need_params.items():
-				print("get : {0}").format(param)
-
-		#TODO: set correctly variable 'has_access' in form
 		if 'has_access' not in request.POST:
 				print "ERR: no field `has access'"
 				raise Http404
@@ -89,5 +85,18 @@ def auth_code_req(request):
 				print("INF: user denied acces request for client {0}").format(auth_need_params['client_name'])
 				return redirect(get_err_response(auth_need_params, 'user_denied_access_request'))
 
-		return HttpResponse("user succesfully logged in")
+		#generate authorization code
+		client_app = get_client_id(auth_need_params['client_id']);
+		if client_app is None:
+				print "ERR: can not find client with id {0}".format(auth_need_params['client_id'])
+				raise Http404
+
+		authorization_code = generate_code()
+		auth_code.objects.create(code=authorization_code, client_id=client_app, creation_time=datetime.now())
+		print "INF: Generated auth-on code {0} for client {1}".format(authorization_code, auth_need_params['client_name'])
+
+		#form response to client 
+		redirect_answer = "{0}/?code={1}&state={2}".format(auth_need_params['redirect_uri'],
+												authorization_code, auth_need_params['state'])
+		return redirect(redirect_answer)
 

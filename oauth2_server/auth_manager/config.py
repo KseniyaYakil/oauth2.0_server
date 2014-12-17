@@ -1,3 +1,4 @@
 class AuthConf:
-		auth_code_expire_period = 60
+		access_exp_time = 600
+		auth_exp_time = 60
 
