@@ -1,5 +1,6 @@
 from django.db import models
 from .config import AuthConf
+from user_get_started.models import User
 
 class client_info(models.Model):
 		client_id = models.CharField(max_length=1024)
@@ -11,6 +12,7 @@ class access_token(models.Model):
 		token = models.CharField(max_length=1024)
 		creation_time = models.DateTimeField(auto_now=True)
 		app_id = models.ForeignKey(client_info)
+	#	user = models.ForeignKey(User)
 		refresh_token = models.CharField(max_length=1024)
 
 		def is_expired(self):
