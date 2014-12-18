@@ -16,6 +16,9 @@ class access_token(models.Model):
 		def is_expired(self):
 				return (datetime.now() - self.creation_time).total_seconds >= AuthConf.access_exp_time
 
+		def expires_in(self):
+				return AuthConf.access_exp_time
+
 class auth_code(models.Model):
 		code = models.CharField(max_length=64)
 		client_id = models.ForeignKey(client_info)

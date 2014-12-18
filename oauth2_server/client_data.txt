@@ -5,3 +5,12 @@ name=oauth2.0_client_v1
 
 #request autharization code
 https://oauth2_server.com/auth/?response_type=code&redirect_uri=http://yandex.ru&client_id=AsdQweZxc123456789&state=12345678909
+
+#request for access token
+curl -kgvv "https://oauth2_server.com/auth/token" --data "grant_type=authorization_code&redirect_uri=http://yandex.ru&client_id=AsdQweZxc123456789&client_secret=987654321cxZewQdsA_secret&code=ebe4d914e62b4ad4bcd8bf73bbf2d911"
+
+#requset refresh token
+curl -kgvv "https://oauth2_server.com/auth/token" --data "grant_type=refresh_token&refresh_token=679a5ffcf54b4b96bafe4612d4ce94bd"
+
+
+
