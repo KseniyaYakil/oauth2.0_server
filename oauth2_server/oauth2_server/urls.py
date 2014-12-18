@@ -5,6 +5,7 @@ urlpatterns = patterns('',
     url(r'^$', 'oauth2_server.views.home', name='home'),
     url(r'^auth/', include('auth_manager.urls')),
     url(r'^user/', include('user_get_started.urls')),
+    url(r'^api/', include('api.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
 )

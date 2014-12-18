@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 		'auth_manager',
 		'user_get_started',
+		'api',
 )
 
 MIDDLEWARE_CLASSES = (
