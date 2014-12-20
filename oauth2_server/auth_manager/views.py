@@ -12,7 +12,7 @@ def get_client_id(client_app_id):
 		try:
 				client_app = get_object_or_404(client_info, client_id=client_app_id)
 				return client_app
-		except DoesNotExist:
+		except client_info.DoesNotExist:
 				print("ERR: client with client_id {0} doesn't exist").format(client_app_id)
 				return None
 
@@ -72,6 +72,7 @@ def auth_code_req(request):
 				request.session['get_params'] = auth_need_params
 				if request.user.is_authenticated():
 						print "user authenticated. request access"
+						print("%r", request.user)
 						return render(request, 'auth_manager/access.html', {'app_name' : auth_need_params['client_name']})
 				else:
 						print "ask for logging in"
@@ -93,7 +94,7 @@ def auth_code_req(request):
 				raise Http404
 
 		authorization_code = generate_code()
-		auth_code.objects.create(code=authorization_code, client_id=client_app, creation_time=datetime.now())
+		auth_code.objects.create(code=authorization_code, client_id=client_app, creation_time=datetime.now(), user=request.user)
 		print "INF: Generated auth-on code {0} for client {1}".format(authorization_code, auth_need_params['client_name'])
 
 		#form response to client 
@@ -170,7 +171,7 @@ def get_access_token(request):
 				print "INF: created tokens: access: {0} refresh: {1}".format(req_access_token, req_refresh_token)
 
 				token = access_token.objects.create(token=req_access_token, app_id=client_app,
-														refresh_token=req_refresh_token)
+														refresh_token=req_refresh_token, user=authorization_code.user)
 		elif request.POST['grant_type'] == 'refresh_token':
 				req_refresh_token = request.POST['refresh_token'] if 'refresh_token' in request.POST else None
 				if req_refresh_token is None:

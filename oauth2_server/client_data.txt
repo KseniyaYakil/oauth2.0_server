@@ -9,9 +9,12 @@ https://oauth2_server.com/auth/?response_type=code&redirect_uri=http://yandex.ru
 #request for access token
 curl -kgvv "https://oauth2_server.com/auth/token" --data "grant_type=authorization_code&redirect_uri=http://yandex.ru&client_id=AsdQweZxc123456789&client_secret=987654321cxZewQdsA_secret&code=ebe4d914e62b4ad4bcd8bf73bbf2d911"
 
+7a830ad47b0142b18cbb34a63c37f526
+
+
 #requset refresh token
-curl -kgvv "https://oauth2_server.com/auth/token" --data "grant_type=refresh_token&refresh_token=679a5ffcf54b4b96bafe4612d4ce94bd"
+curl -kgvv "https://oauth2_server.com/auth/token" --data "grant_type=refresh_token&refresh_token=ea53af4dcc6a4a9d9a91dfe8989e0e1a"
 
 #request api info 
-curl  -H "Content-Type: application/json" -H "Authorization: abcdef"  -kgvv  https://oauth2_server.com/api/position
+curl   -kgvv  https://oauth2_server.com/api/position  -H "Content-Type: application/json" -H "Authorization: " 
 
