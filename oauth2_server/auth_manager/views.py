@@ -102,16 +102,16 @@ def auth_code_req(request):
 												authorization_code, auth_need_params['state'])
 		return redirect(redirect_answer)
 
-#TODO: in a case of error return Json object with err_code and err_detailed
 def parse_access_req_params(req_params):
 		access_need_params = {'grant_type' : 0, 'client_id' : 0, 'client_secret' : 0, 'redirect_uri' : 0, 'code' : 0}
 
 		for key, value in access_need_params.items():
 				if key not in req_params:
 						print("ERR: no authorization needed param `{0}'").format(key)
-						return JsonResponse({
-								'error' : "no parametr {0}".format(key),
-						})
+						resp = HttpResponse()
+						resp.status_code = 400
+						return resp
+
 				access_need_params[key] = req_params[key]
 
 		return access_need_params
@@ -120,9 +120,9 @@ def parse_access_req_params(req_params):
 def get_access_token(request):
 		if 'grant_type' not in request.POST:
 				print "ERR: no grant_type field in req"
-				return JsonResponse({
-						'error': 'no grant_type field'
-				})
+				resp = HttpResponse()
+				resp.status_code = 400
+				return resp
 
 		if request.POST['grant_type'] == 'authorization_code':
 				access_params = parse_access_req_params(request.POST)
@@ -135,9 +135,9 @@ def get_access_token(request):
 						authorization_code = auth_code.objects.get(code=access_params['code'])
 				except auth_code.DoesNotExist:
 						print "ERR: no auth code `{0}' in db".format(access_params['code'])
-						return JsonResponse({
-								'error' : "incorrect authorization code"
-						})
+						resp = HttpResponse()
+						resp.status_code = 401
+						return resp
 
 				#check client id and secret in db
 				client_app = None
@@ -149,9 +149,9 @@ def get_access_token(request):
 						print("ERR: client with client_id: {0} client_secret: {1} doesn't exist").format(
 																				access_params['client_id'],
 																				access_params['client_secret'])
-						return JsonResponse({
-								'error': 'incorrect filed(s) client_id, client_secret'
-						})
+						resp = HttpResponse()
+						resp.status_code = 400
+						return resp
 
 				if authorization_code.client_id != client_app:
 						print "ERR: diff client_id and auth_code.client_id"
@@ -160,9 +160,9 @@ def get_access_token(request):
 				#check redirect uri
 				if client_app.redirect_domain != access_params['redirect_uri']:
 						print "ERR: redirect_uri {0} is not correct".format(access_params['redirect_uri'])
-						return JsonResponse({
-								'error': 'incorrect redirect uri for specified client'
-						})
+						resp = HttpResponse()
+						resp.status_code = 400
+						return resp
 
 				#create refresh and access tokens
 				req_refresh_token = generate_code()
@@ -176,18 +176,19 @@ def get_access_token(request):
 				req_refresh_token = request.POST['refresh_token'] if 'refresh_token' in request.POST else None
 				if req_refresh_token is None:
 						print "ERR: no field `refresh_token' in req"
-						return JsonResponse({
-								'error': 'no field refresh_token'
-						})
+						resp = HttpResponse()
+						resp.status_code = 400
+						return resp
 
 				#check if refresh token is in db
 				try:
 						token = access_token.objects.get(refresh_token=req_refresh_token)
 				except access_token.DoesNotExist:
 						print "ERR: no refresh_token `{0}' in db".format(req_refresh_token)
-						return JsonResponse({
-								'error': 'incorrect refresh_token'
-						})
+						resp = HttpResponse()
+						resp.status_code = 400
+						return resp
+
 				#generate new aceess token
 				req_access_token = generate_code()
 
@@ -199,9 +200,9 @@ def get_access_token(request):
 				print "INF: generated new access_token {0}".format(req_access_token)
 		else:
 				print "ERR: incorrect grant_type"
-				return JsonResponse({
-						'error': 'incorrect grant_type'
-				})
+				resp = HttpResponse()
+				resp.status_code = 400
+				return resp
 
 		return JsonResponse({
 				'access_token': token.token,

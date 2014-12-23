@@ -18,3 +18,8 @@ curl -kgvv "https://oauth2_server.com/auth/token" --data "grant_type=refresh_tok
 #request api info 
 curl   -kgvv  https://oauth2_server.com/api/position  -H "Content-Type: application/json" -H "Authorization: " 
 
+curl   -kgvv  https://oauth2_server.com/api/employe  -H "Content-Type: application/json" -H "Authorization: " 
+
+curl   -kgvv  https://oauth2_server.com/api/employe/4  -H "Content-Type: application/json" -H "Authorization: ab81c7a2e2fb4564b545a4e863c4359a"
+
+curl   -kgvv  https://oauth2_server.com/api/employe?page=1  -H "Content-Type: application/json" -H "Authorization: "

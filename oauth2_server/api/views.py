@@ -28,17 +28,24 @@ def position(request):
 		if 'page' in request.GET:
 				page = paginate(request.GET['page'], Position.objects.all())
 				if page is None:
-						return JsonResponse({
-						})
+						resp = HttpResponse()
+						resp.status_code = 500
+						return resp
 
 				objects = page.object_list
 		else:
 				objects = get_list_or_404(Position)
 
-		return JsonResponse({
-				'positions': [{'id': obj.id,
-								'name' : obj.name} for obj in objects]
-		})
+		position_list = [{'id': obj.id, 'name' : obj.name} for obj in objects]
+
+		response_data = {}
+		response_data['items_cnt'] = len(position_list)
+		response_data['positions'] = position_list
+
+		resp = HttpResponse(json.dumps(response_data), content_type="application/json")
+		resp.status_code = 200
+
+		return resp
 
 def check_access(request):
 		for header in request.META:
@@ -47,7 +54,17 @@ def check_access(request):
 		if 'HTTP_AUTHORIZATION' not in request.META:
 				return 'no authorization field'
 
-		access_code = request.META['HTTP_AUTHORIZATION']
+		access_code_str = request.META['HTTP_AUTHORIZATION']
+
+		list_params = access_code_str.split(' ')
+		if len(list_params) < 2:
+				return 'incorrect access token'
+
+		if list_params[0] != 'bearer':
+				return 'incorrect access token'
+
+		access_code = list_params[1]
+
 		#check if access token is correct
 		try:
 				acc_obj = access_token.objects.get(token=access_code)
@@ -68,17 +85,23 @@ def me(request):
 				access_code = request.META['HTTP_AUTHORIZATION']
 				acc_obj = access_token.objects.get(token=access_code)
 				user = acc_obj.user
-				return JsonResponse({
-						'full_name': user.first_name,
-						'username': user.username,
-						'email': user.email,
-						'mobile_phone': user.mobile_phone,
-						'birthday': user.birth_day
-				})
+
+				response_data = {}
+				response_data['full_name'] = user.first_name
+				response_data['username'] = user.username
+				response_data['email'] = user.email
+				response_data['mobile_phone'] = user.mobile_phone
+				response_data['birthday'] = user.birth_day
+
+				resp = HttpResponse(json.dumps(response_data), content_type="application/json")
+				resp.status_code = 200
+
+				return resp
 		else:
-				return JsonResponse({
-						'error': msg
-				})
+				print "ERR: {0}".format(msg)
+				resp = HttpResponse()
+				resp.status_code = 401
+				return resp
 
 @csrf_exempt
 def employes(request):
@@ -87,27 +110,31 @@ def employes(request):
 				if 'page' in request.GET:
 						page = paginate(request.GET['page'], Employe.objects.all())
 						if page is None:
-								return JsonResponse({
-						})
+								resp = HttpResponse()
+								resp.status_code = 500
+								return resp
 
 						objects = page.object_list
 				else:
 						objects = get_list_or_404(Employe)
 
-				return JsonResponse({
-						'employes' : ["emp: {0} position: {1} id: {2}".format(obj.user.first_name,
+				employe_list = ["emp: {0} position: {1} id: {2}".format(obj.user.first_name,
 																				obj.position.name,
 																				obj.user.id) for obj in objects]
-				})
+				response_data = {}
+				response_data['items_cnt'] = len(employe_list)
+				response_data['employes'] = employe_list
 
+				resp = HttpResponse(json.dumps(response_data), content_type="application/json")
+				resp.status_code = 200
+				return resp
 		else:
-				return JsonResponse({
-						'error': msg
-				})
+				resp = HttpResponse()
+				resp.status_code = 401
+				return resp
 
 @csrf_exempt
 def employe_id(request, emp_id):
-		print emp_id
 		msg = check_access(request)
 		if msg == 'ok':
 				access_code = request.META['HTTP_AUTHORIZATION']
@@ -117,31 +144,33 @@ def employe_id(request, emp_id):
 				str_user_id = "{0}".format(user.id)
 				str_emp_id = "{0}".format(emp_id)
 				if str_user_id != str_emp_id:
-						return JsonResponse({
-								'error' : 'no privelegue to get requested page'
-						})
+						resp = HttpResponse()
+						resp.status_code = 403
+						return resp
 				try:
 						emp_obj = Employe.objects.get(user=emp_id)
 				except Employe.DoesNotExist:
 						raise Http404
 
 				position = emp_obj.position
-				return JsonResponse({
-						'full_name': user.first_name,
-						'username': user.username,
-						'email': user.email,
-						'mobile_phone': user.mobile_phone,
-						'birthday': user.birth_day,
-						'position': position.name,
-				})
+				response_data = {}
+				response_data['full_name'] = user.first_name
+				response_data['username'] = user.username
+				response_data['email'] = user.email
+				response_data['mobile_phone'] = user.mobile_phone
+				response_data['birthday'] = user.birth_day
+				response_data['position'] = position.name
+
+				resp = HttpResponse(json.dumps(response_data), content_type="application/json")
+				resp.status_code = 200
+				return resp
 		else:
-				return JsonResponse({
-						'error': msg
-				})
+				resp = HttpResponse()
+				resp.status_code = 401
+				return resp
 
 @csrf_exempt
 def position_id(request, pos_id):
-		print pos_id
 		msg = check_access(request)
 		if msg == 'ok':
 				access_code = request.META['HTTP_AUTHORIZATION']
@@ -151,30 +180,35 @@ def position_id(request, pos_id):
 				str_pos_id = "{0}".format(pos_id)
 
 				if str_user_id != str_pos_id:
-						return JsonResponse({
-								'error' : 'no privelegue to get requested page'
-						})
-
+						resp = HttpResponse()
+						resp.status_code = 403
+						return resp
 				try:
 						emp_obj = Employe.objects.get(user=pos_id)
 				except Employe.DoesNotExist:
-						print "here 1"
 						raise Http404
 
 				position = emp_obj.position
-				return JsonResponse({
-						'full_name' : user.first_name,
-						'position_name': position.name,
-						'salary': position.salary,
-						'salary_currency': position.salary_currency
-				})
+				response_data = {}
+				response_data['full_name'] = user.first_name
+				response_data['position_name'] = position.name
+				response_data['salary'] = position.salary
+				response_data['salary_currency'] = position.salary_currency
+
+				resp = HttpResponse(json.dumps(response_data), content_type="application/json")
+				resp.status_code = 200
+				return resp
 		else:
-				return JsonResponse({
-						'error': msg
-				})
+				resp = HttpResponse()
+				resp.status_code = 401
+				return resp
 
 def index(request):
-		return JsonResponse({
-				'server': 'oauth2_server.com',
-				'version': 'django {0}'.format(get_version())
-		})
+		response_data = {}
+		response_data['server'] = 'oauth2_server.com'
+		response_data['version'] = 'django {0}'.format(get_version())
+
+		resp = HttpResponse(json.dumps(response_data), content_type="application/json")
+		resp.status_code = 200
+		return resp
+

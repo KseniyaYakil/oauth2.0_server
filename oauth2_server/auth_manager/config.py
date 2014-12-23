@@ -1,3 +1,3 @@
 class AuthConf:
-		access_exp_time = 1200
+		access_exp_time = 999999999
 

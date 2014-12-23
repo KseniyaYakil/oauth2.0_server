@@ -1,2 +1,2 @@
 class ApiConfig:
-		paginator_items_per_page = 1
+		paginator_items_per_page = 2
